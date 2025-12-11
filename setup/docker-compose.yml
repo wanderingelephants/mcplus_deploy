@@ -1,0 +1,93 @@
+services:
+  postgres_db:
+    image: ${PG_IMAGE}
+    container_name: ${PG_CONTAINER_NAME}
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    ports:
+      - "${PG_PORT}:5432"
+    volumes:
+      - ${PG_LOCAL_VOLUME}:/var/lib/postgresql
+    restart: always
+  graphql:
+    container_name: graphql
+    build:
+      dockerfile: Dockerfile
+      context: ./hasura
+      args:
+        - POSTGRES_URL=$POSTGRES_URL
+        - HASURA_ADMIN_SECRET=$HASURA_ADMIN_SECRET
+        - NODE_API_URL=${NODE_API_URL}
+    ports:
+    - "${GRAPHQL_EXTERNAL_PORT:-8081}:8080"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres_db:
+        condition: service_started  
+    networks:
+      - mcp_plus_inter_service_network
+  api:
+    image: mcplus/mcpapi:latest
+    container_name: api
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    env_file:
+    - ./mcpapi.env
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ${DATA_ROOT_FOLDER}:/app/data
+    mem_limit: 12g
+    depends_on:
+      graphql:
+        condition: service_healthy
+    networks:
+      - mcp_plus_inter_service_network
+  mcplus-sandbox:
+    image: mcplus/sandbox:latest
+    container_name: mcplus-sandbox
+    working_dir: /app
+  # command left out because CMD is configured in Dockerfile; override if you must
+  # command: ["run", "--allow-net", "--deny-write", "--deny-read", "--allow-env", "/app/server.obf.js"]
+    volumes:
+      - ${DATA_ROOT_FOLDER:-/home/ec2-user/data}:/app/data
+    environment:
+      - NODE_API_URL=${NODE_API_URL}
+      - NODE_API_WS_URL=${NODE_API_WS_URL}
+      - DATA_ROOT_FOLDER=/app/data
+    ports:
+      - "4123:4123"
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      - mcp_plus_inter_service_network
+    mem_limit: 8g
+    mem_reservation: 4g
+  nginx:
+    image: mcplus/mcpuilocal:latest 
+    container_name: nginx  
+    ports:
+      - "80:80"
+    environment:
+      FIREBASE_API_KEY: ${FIREBASE_API_KEY}
+      FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_APP_ID: ${FIREBASE_APP_ID}
+      UI_GRAPHQL_ENDPOINT: ${UI_GRAPHQL_ENDPOINT}
+      UI_GRAPHQL_SOCKET_ENDPOINT: ${UI_GRAPHQL_SOCKET_ENDPOINT}
+    depends_on:
+      - api
+    networks:
+      - mcp_plus_inter_service_network
+networks:
+  mcp_plus_inter_service_network:
+    external: true

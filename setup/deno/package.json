@@ -1,0 +1,25 @@
+{
+  "name": "deno-sandbox",
+  "version": "1.0.0",
+  "description": "Build + obfuscation + publish pipeline for Deno sandbox executor (multi-stage Docker)",
+  "type": "module",
+  "scripts": {
+    "local:build:obfuscate": "node build.js",
+    "docker:build": "docker build -f Dockerfile -t mcplus/sandbox:latest .",
+    "docker:tag": "docker tag mcplus/sandbox:latest mcplus/sandbox:$(git rev-parse --short HEAD)",
+    "docker:push:latest": "docker push mcplus/sandbox:latest",
+    "docker:push:tag": "docker push mcplus/sandbox:$(git rev-parse --short HEAD)",
+    "docker:publish": "npm run docker:build && npm run docker:tag && npm run docker:push:latest && npm run docker:push:tag"
+  },
+  "devDependencies": {
+    "esbuild": "^0.23.0",
+    "javascript-obfuscator": "^4.1.0"
+  },
+  "keywords": [
+    "deno",
+    "docker",
+    "obfuscation"
+  ],
+  "author": "",
+  "license": "ISC"
+}

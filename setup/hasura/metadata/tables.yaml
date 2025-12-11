@@ -1,0 +1,209 @@
+- table:
+    name: user_chats
+    schema: public
+  object_relationships:
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          user:
+            email:
+              _eq: X-Hasura-User-Id
+        columns:
+          - api_custom_args
+          - api_execution_results
+          - api_execution_status
+          - api_function_docs
+          - api_function_text
+          - api_function_type
+          - api_name
+          - api_user_prompt
+          - chat_uuid
+          - created_at
+          - updated_at
+          - user_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - api_custom_args
+          - api_execution_cost
+          - api_execution_results
+          - api_execution_status
+          - api_function_docs
+          - api_function_text
+          - api_function_type
+          - api_name
+          - api_user_prompt
+          - chat_uuid
+          - created_at
+          - id
+          - is_first
+          - updated_at
+          - user_id
+        filter:
+          user:
+            email:
+              _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - api_custom_args
+          - api_execution_results
+          - api_execution_status
+          - api_function_docs
+          - api_function_text
+          - api_function_type
+          - api_name
+          - api_user_prompt
+          - chat_uuid
+          - created_at
+          - updated_at
+        filter:
+          user:
+            email:
+              _eq: X-Hasura-User-Id
+        check: null
+  delete_permissions:
+    - role: user
+      permission:
+        filter:
+          user:
+            email:
+              _eq: X-Hasura-User-Id
+- table:
+    name: user_chats_share
+    schema: public
+  object_relationships:
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          user:
+            email:
+              _eq: X-Hasura-User-Id
+        columns:
+          - api_custom_args
+          - api_execution_results
+          - api_function_docs
+          - api_function_text
+          - api_function_type
+          - api_name
+          - api_user_prompt
+          - chat_id
+          - chat_uuid
+          - created_at
+          - id
+          - updated_at
+          - user_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - api_custom_args
+          - api_execution_results
+          - api_function_docs
+          - api_function_text
+          - api_function_type
+          - api_name
+          - api_user_prompt
+          - chat_id
+          - chat_uuid
+          - created_at
+          - id
+          - updated_at
+          - user_id
+        filter:
+          user:
+            email:
+              _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - api_custom_args
+          - api_execution_results
+          - api_function_docs
+          - api_function_text
+          - api_function_type
+          - api_name
+          - api_user_prompt
+          - chat_uuid
+          - created_at
+          - updated_at
+        filter:
+          user:
+            email:
+              _eq: X-Hasura-User-Id
+        check: null
+- table:
+    name: users
+    schema: public
+  insert_permissions:
+    - role: user
+      permission:
+        check:
+          email:
+            _eq: X-Hasura-User-Id
+        columns:
+          - is_admin
+          - id
+          - status
+          - callback_url
+          - display_name
+          - email
+          - google_id
+          - photo_url
+          - telegram_id
+          - webhook_secret
+          - created_at
+          - last_login
+          - updated_at
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - id
+          - google_id
+          - email
+          - display_name
+          - photo_url
+          - last_login
+          - is_admin
+          - telegram_id
+          - callback_url
+          - webhook_secret
+          - status
+          - created_at
+          - updated_at
+        filter:
+          email:
+            _eq: X-Hasura-User-Id
+  update_permissions:
+    - role: user
+      permission:
+        columns:
+          - is_admin
+          - id
+          - status
+          - callback_url
+          - display_name
+          - email
+          - google_id
+          - photo_url
+          - telegram_id
+          - webhook_secret
+          - created_at
+          - last_login
+          - updated_at
+        filter:
+          email:
+            _eq: X-Hasura-User-Id
+        check: null
