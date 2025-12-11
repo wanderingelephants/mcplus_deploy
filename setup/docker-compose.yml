@@ -50,13 +50,13 @@ services:
         condition: service_healthy
     networks:
       - mcp_plus_inter_service_network
-  mcplus-sandbox:
-    image: mcplus/sandbox:latest
-    container_name: mcplus-sandbox
+  deno-executor:
+    image: denoland/deno:latest
+    container_name: deno-executor
+    command: ["run", "--allow-net=api:3000,api:3001,host.docker.internal:3000,host.docker.internal:3001,:4123", "--deny-write", "--deny-read", "--allow-env", "/app/server.ts"]
     working_dir: /app
-  # command left out because CMD is configured in Dockerfile; override if you must
-  # command: ["run", "--allow-net", "--deny-write", "--deny-read", "--allow-env", "/app/server.obf.js"]
     volumes:
+      - ../packages/server/deno:/app
       - ${DATA_ROOT_FOLDER:-/home/ec2-user/data}:/app/data
     environment:
       - NODE_API_URL=${NODE_API_URL}
@@ -65,13 +65,13 @@ services:
     ports:
       - "4123:4123"
     security_opt:
-      - seccomp:unconfined
+    - seccomp:unconfined
     cap_add:
-      - SYS_ADMIN
+    - SYS_ADMIN    
     networks:
       - mcp_plus_inter_service_network
     mem_limit: 8g
-    mem_reservation: 4g
+    mem_reservation: 4g  
   nginx:
     image: mcplus/mcpuilocal:latest 
     container_name: nginx  
